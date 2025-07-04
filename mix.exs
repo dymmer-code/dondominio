@@ -29,7 +29,8 @@ defmodule DonDominio.MixProject do
       {:decimal, "~> 2.3"},
       {:typed_ecto_schema, "~> 0.4"},
       {:ecto, "~> 3.12"},
-      {:bypass, "~> 2.1"},
+
+      {:bypass, "~> 2.1", only: :test},
 
       # only for dev
       {:dialyxir, ">= 0.0.0", only: [:dev, :test], runtime: false},
