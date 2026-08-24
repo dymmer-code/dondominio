@@ -20,17 +20,12 @@ defmodule DonDominio.Request do
 
   @doc false
   def client do
-    Tesla.client(
-      [
-        {Tesla.Middleware.Logger,
-         format: "$method /domain$url ===> $status / time=$time", log_level: :debug},
-        {Tesla.Middleware.BaseUrl, Application.get_env(:don_dominio, :url)},
-        ## TODO content-type: text/plain; charset=utf8
-        # plug(Tesla.Middleware.DecodeJson)
-        Tesla.Middleware.EncodeFormUrlencoded
-      ],
-      {Tesla.Adapter.Finch, name: DonDominio.Finch}
-    )
+    [
+      base_url: Application.get_env(:don_dominio, :url),
+      finch: [name: DonDominio.Finch]
+    ]
+    |> Keyword.merge(Application.get_env(:don_dominio, :req_options, []))
+    |> Req.new()
   end
 
   @doc false
@@ -54,7 +49,7 @@ defmodule DonDominio.Request do
   def maybe_add(data, name, value), do: Map.put(data, name, value)
 
   @doc """
-  Perform a request. It's creating a Tesla client, performing the POST
+  Perform a request. It's creating a Req client, performing the POST
   action using the content (first optional parameter) to add the auth
   parameters and then perform the request using the URI passed as the
   second parameter. The response is processed using
@@ -62,7 +57,7 @@ defmodule DonDominio.Request do
   """
   def request(content \\ %{}, action) do
     client()
-    |> Tesla.post(action, body(content))
+    |> Req.post(url: action, form: body(content))
     |> Response.process()
   end
 end

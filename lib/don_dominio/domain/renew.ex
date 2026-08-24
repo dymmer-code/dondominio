@@ -1,4 +1,9 @@
 defmodule DonDominio.Domain.Renew do
+  @moduledoc """
+  The per-domain result of a `domain/renew` action, as returned by
+  `DonDominio.Domain.renew/3` alongside a `DonDominio.Domain.Billing` for
+  the total charged.
+  """
   use DonDominio.Schema
   import DonDominio.Domain.Status, only: [statuses: 0]
 
@@ -13,6 +18,7 @@ defmodule DonDominio.Domain.Renew do
     field(:inPromo, :boolean, default: false)
   end
 
+  @doc false
   def normalize(params) when not is_struct(params) and is_map(params) do
     params =
       params

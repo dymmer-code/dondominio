@@ -27,6 +27,9 @@ defmodule DonDominio.Response do
     field(:responseData, :map)
   end
 
+  @doc """
+  The human-readable description for a DonDominio API `errorCode`.
+  """
   def err_msg(0), do: "Success"
   def err_msg(1), do: "Undefined error"
   def err_msg(100), do: "Syntax error"
@@ -95,7 +98,9 @@ defmodule DonDominio.Response do
   def err_msg(10_001), do: "WebConstructor Error"
 
   @doc """
-  Transform the parameters received from the check calls to the structure.
+  Normalizes a decoded API response body into a `DonDominio.Response`,
+  further normalizing `responseData` into the shape the matching
+  `action` expects (a list gets wrapped as `%{"data" => data}` first).
   """
   def normalize(%{"responseData" => data} = params) when is_list(data) do
     params
@@ -203,10 +208,18 @@ defmodule DonDominio.Response do
     %__MODULE__{response | responseData: %{queryInfo: query_info, zones: zones}}
   end
 
-  def process({:ok, %Tesla.Env{status: 200, body: body}}),
+  @doc """
+  Turns a `Req` response (or error) from `DonDominio.Request.request/2` into
+  `{:ok, %DonDominio.Response{}}` on a `200`, `{:error, {status, body}}` on
+  any other status, or passes a transport-level error through unchanged.
+  """
+  def process({:ok, %Req.Response{status: 200, body: body}}) when is_binary(body),
     do: {:ok, normalize(Jason.decode!(body))}
 
-  def process({:ok, %Tesla.Env{status: status, body: body}}),
+  def process({:ok, %Req.Response{status: 200, body: body}}) when is_map(body),
+    do: {:ok, normalize(body)}
+
+  def process({:ok, %Req.Response{status: status, body: body}}),
     do: {:error, {status, body}}
 
   def process({:error, _reason} = error), do: error

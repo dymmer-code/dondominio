@@ -1,4 +1,10 @@
 defmodule DonDominio.Domain.Info do
+  @moduledoc """
+  Full details of a registered domain, as returned by
+  `DonDominio.Domain.info/2`. Which optional fields are populated depends on
+  the `type` requested (`:status`, `:contact`, `:nameservers`, `:authcode`,
+  ... -- omitting `type` returns everything).
+  """
   use DonDominio.Schema
   alias DonDominio.Domain.Status
 
@@ -46,6 +52,9 @@ defmodule DonDominio.Domain.Info do
     field(:defaultNS, :boolean)
 
     embeds_many :nameservers, Nameservers, primary_key: false do
+      @moduledoc """
+      One of a domain's name servers, as embedded in `DonDominio.Domain.Info`.
+      """
       field(:order, :integer)
       field(:name, :string)
       field(:ipv4, :string)

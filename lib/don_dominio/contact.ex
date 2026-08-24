@@ -1,4 +1,8 @@
 defmodule DonDominio.Contact do
+  @moduledoc """
+  Creates and looks up the contacts used as a domain's registrant, admin,
+  tech, and billing contacts.
+  """
   use DonDominio.Request
   alias DonDominio.Response
 
@@ -15,6 +19,9 @@ defmodule DonDominio.Contact do
           required(:Country) => String.t()
         }
 
+  @doc """
+  Creates an individual (natural person) contact.
+  """
   @spec create_individual(contact_individual_map()) :: {:ok, Response.t()} | {:error, any()}
   def create_individual(contact) do
     contact
@@ -39,6 +46,9 @@ defmodule DonDominio.Contact do
           required(:Country) => String.t()
         }
 
+  @doc """
+  Creates an organization contact.
+  """
   @spec create_organization(contact_organization_map()) :: {:ok, Response.t()} | {:error, any()}
   def create_organization(contact) do
     contact
@@ -60,6 +70,9 @@ defmodule DonDominio.Contact do
           optional(:daaccepted) => boolean()
         }
 
+  @doc """
+  Lists contacts, optionally filtered/paginated via `options`.
+  """
   @spec list() :: {:ok, Response.t()} | {:error, any()}
   @spec list(filter_options()) :: {:ok, Response.t()} | {:error, any()}
   def list(options \\ %{}) do
@@ -68,6 +81,9 @@ defmodule DonDominio.Contact do
 
   @type contact_id() :: String.t()
 
+  @doc """
+  Fetches a contact's data by its `contact_id`.
+  """
   @spec info(contact_id()) :: {:ok, Response.t()} | {:error, any}
   def info(contact_id) do
     # XXX: at the moment there are no another infoType available

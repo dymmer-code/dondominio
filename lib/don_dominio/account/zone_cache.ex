@@ -1,4 +1,11 @@
 defmodule DonDominio.Account.ZoneCache do
+  @moduledoc """
+  Caches the reseller account's DNS zones in memory, populated from
+  `DonDominio.Account.zones/1` on startup and refreshed on a timer (every
+  24h by default, configurable via `:refresh_interval_ms`; disabled entirely
+  by setting `:auto_refresh` to `false`) so `DonDominio.Account.get_zone_by_tld/1`
+  and `get_zones_by_top_tld/1` don't hit the API on every lookup.
+  """
   use GenServer
 
   require Logger
@@ -12,6 +19,7 @@ defmodule DonDominio.Account.ZoneCache do
 
   @wait_before_retry :timer.seconds(5)
 
+  @doc false
   def start_link([]) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end

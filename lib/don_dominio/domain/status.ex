@@ -1,4 +1,11 @@
 defmodule DonDominio.Domain.Status do
+  @moduledoc """
+  A domain's current status, as returned by `DonDominio.Domain.check/1`,
+  `check_for_transfer/1`, and `list/1`. Also defines the shared
+  `status_code()` enum and its human-readable descriptions, reused as the
+  `:status` field's `Ecto.Enum` values by `DonDominio.Domain.Create` and
+  `DonDominio.Domain.Renew`.
+  """
   use DonDominio.Schema
 
   @type status_code() ::
@@ -39,8 +46,13 @@ defmodule DonDominio.Domain.Status do
     field(:domainID, :integer)
   end
 
+  @doc """
+  The `status_code()` -> human-readable description mapping, also used as
+  the `Ecto.Enum` values for the `:status` field on this and related schemas.
+  """
   def statuses, do: @statuses
 
+  @doc false
   def normalize(params) when not is_struct(params) and is_map(params) do
     params =
       params

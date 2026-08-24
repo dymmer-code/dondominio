@@ -19,6 +19,11 @@ defmodule DonDominio.Schema do
     end
   end
 
+  @doc """
+  Replaces `params[field]` with `new_value` when it currently equals `value`
+  (e.g. normalizing an empty-string date field to `nil` before
+  `Ecto.embedded_load/3`), leaving `params` untouched otherwise.
+  """
   def change_if(params, field, value, new_value) do
     if params[field] == value do
       Map.put(params, field, new_value)

@@ -15,6 +15,10 @@ defmodule DonDominio.Domain do
     request(%{domain: domain}, "/domain/check/")
   end
 
+  @doc """
+  Checks whether a domain currently registered elsewhere is eligible for
+  transfer to this reseller account.
+  """
   def check_for_transfer(domain) do
     request(%{domain: domain}, "/domain/checkfortransfer/")
   end
@@ -33,6 +37,12 @@ defmodule DonDominio.Domain do
   @type additional() :: %{}
   @type premium() :: boolean()
 
+  @doc """
+  Registers a new domain for the given `period` (in years), name servers,
+  and contacts. `additional` carries TLD-specific extra fields (e.g.
+  `:aeroId`/`:aeroPass` for `.aero`, `:ownerDateOfBirth` for some ccTLDs) --
+  only the keys relevant to the domain's actual TLD are sent.
+  """
   @spec create(domain(), period(), nameservers(), contact_ids()) ::
           {:ok, Response.t()} | {:error, any()}
   @spec create(domain(), period(), nameservers(), contact_ids(), additional()) ::
@@ -76,9 +86,13 @@ defmodule DonDominio.Domain do
 
   @type auth_code() :: String.t()
 
-  @spec create(domain(), auth_code(), nameservers(), contact_ids()) ::
+  @doc """
+  Requests the transfer of a domain registered elsewhere into this reseller
+  account, using its transfer `auth_code`.
+  """
+  @spec transfer(domain(), auth_code(), nameservers(), contact_ids()) ::
           {:ok, Response.t()} | {:error, any()}
-  @spec create(domain(), auth_code(), nameservers(), contact_ids(), additional()) ::
+  @spec transfer(domain(), auth_code(), nameservers(), contact_ids(), additional()) ::
           {:ok, Response.t()} | {:error, any()}
   def transfer(domain, auth_code, ns, contacts, additional \\ %{}) when is_binary(domain) do
     %{
@@ -113,6 +127,9 @@ defmodule DonDominio.Domain do
     |> request("/domain/transfer/")
   end
 
+  @doc """
+  Restarts a domain transfer that's stuck waiting for a new/updated `auth_code`.
+  """
   @spec transfer_restart(domain() | domain_id(), auth_code()) ::
           {:ok, Response.t()} | {:error, any()}
   def transfer_restart(domain, auth_code) when is_binary(domain) do
@@ -131,6 +148,9 @@ defmodule DonDominio.Domain do
     |> request("/domain/transferrestart/")
   end
 
+  @doc """
+  Updates a domain's owner/admin/tech/billing contacts.
+  """
   @spec update_contact(domain() | domain_id(), contact_ids()) ::
           {:ok, Response.t()} | {:error, any()}
   def update_contact(domain, contacts) when is_binary(domain) do
@@ -157,6 +177,9 @@ defmodule DonDominio.Domain do
     |> request("/domain/update/")
   end
 
+  @doc """
+  Updates a domain's name servers.
+  """
   @spec update_nameservers(domain() | domain_id(), nameservers()) ::
           {:ok, Response.t()} | {:error, any()}
   def update_nameservers(domain, ns) when is_binary(domain) do
@@ -177,6 +200,9 @@ defmodule DonDominio.Domain do
     |> request("/domain/update/")
   end
 
+  @doc """
+  Enables/disables the transfer lock (theft protection) on a domain.
+  """
   @spec update_transfer_block(domain() | domain_id(), boolean()) ::
           {:ok, Response.t()} | {:error, any()}
   def update_transfer_block(domain, block) when is_binary(domain) do
@@ -197,6 +223,10 @@ defmodule DonDominio.Domain do
     |> request("/domain/update/")
   end
 
+  @doc """
+  Enables/disables the client hold (`block`) on a domain, distinct from
+  `update_transfer_block/2`'s transfer lock.
+  """
   @spec update_block(domain() | domain_id(), boolean()) :: {:ok, Response.t()} | {:error, any()}
   def update_block(domain, block) when is_binary(domain) do
     %{
@@ -216,6 +246,10 @@ defmodule DonDominio.Domain do
     |> request("/domain/update/")
   end
 
+  @doc """
+  Sets whether the domain's WHOIS data is publicly viewable (`view_whois`) --
+  `false` enables WHOIS privacy protection.
+  """
   @spec update_whois_privacy(domain() | domain_id(), boolean()) ::
           {:ok, Response.t()} | {:error, any()}
   def update_whois_privacy(domain, view_whois) when is_binary(domain) do
@@ -238,6 +272,9 @@ defmodule DonDominio.Domain do
 
   @type renewal_mode() :: :autorenew | :manual
 
+  @doc """
+  Sets a domain's renewal mode (`:autorenew` or `:manual`).
+  """
   @spec update_renewal_mode(domain() | domain_id(), renewal_mode()) ::
           {:ok, Response.t()} | {:error, any()}
   def update_renewal_mode(domain, renewal_mode) when is_binary(domain) do
@@ -260,6 +297,9 @@ defmodule DonDominio.Domain do
 
   @type tags() :: [String.t()]
 
+  @doc """
+  Replaces a domain's tags.
+  """
   @spec update_tag(domain() | domain_id(), tags()) :: {:ok, Response.t()} | {:error, any()}
   def update_tag(domain, tags) when is_binary(domain) do
     %{
@@ -302,12 +342,20 @@ defmodule DonDominio.Domain do
           optional(:renewalMode) => :autorenew | :manual | :letexpire
         }
 
+  @doc """
+  Lists domains registered on this reseller account, optionally
+  filtered/paginated via `options`.
+  """
   @spec list() :: {:ok, Response.t()} | {:error, any()}
   @spec list(filter_options()) :: {:ok, Response.t()} | {:error, any()}
   def list(options \\ %{}) do
     request(options, "/domain/list/")
   end
 
+  @doc """
+  Fetches a domain's info; `type` narrows the response to one section (e.g.
+  `:nameservers`, `:contact`) instead of everything.
+  """
   @spec info(domain() | domain_id()) :: {:ok, Response.t()} | {:error, any()}
   @spec info(domain() | domain_id(), nil | info_type()) :: {:ok, Response.t()} | {:error, any()}
   def info(domain, type \\ nil)
@@ -326,6 +374,11 @@ defmodule DonDominio.Domain do
 
   @type expiration_date() :: Date.t()
 
+  @doc """
+  Renews a domain for `period` years. `expiration_date` must match the
+  domain's current expiration date (see `info/2`), as a safeguard against
+  double-renewing.
+  """
   @spec renew(domain() | domain_id(), expiration_date(), period()) ::
           {:ok, Response.t()} | {:error, any()}
   def renew(domain, expiration_date, period) when is_binary(domain) do
@@ -338,6 +391,9 @@ defmodule DonDominio.Domain do
     |> request("/domain/renew/")
   end
 
+  @doc """
+  Fetches the raw WHOIS data for a domain.
+  """
   @spec whois(domain()) :: {:ok, Response.t()} | {:error, any()}
   def whois(domain) when is_binary(domain) do
     request(%{domain: domain}, "/domain/whois/")

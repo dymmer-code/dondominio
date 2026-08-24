@@ -1,4 +1,10 @@
 defmodule DonDominio.Contact.Info do
+  @moduledoc """
+  A registrant/admin/tech/billing contact, as returned by
+  `DonDominio.Contact.info/1` and `DonDominio.Contact.list/1` -- either an
+  `:individual` (`firstName`/`lastName`) or an `:organization` (`orgName`),
+  per `contactType`.
+  """
   use DonDominio.Schema
 
   @primary_key false

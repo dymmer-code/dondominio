@@ -4,7 +4,7 @@ defmodule DonDominio.MixProject do
   def project do
     [
       app: :don_dominio,
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -24,13 +24,10 @@ defmodule DonDominio.MixProject do
 
   defp deps do
     [
-      {:tesla, "~> 1.14"},
-      {:finch, "~> 0.19"},
-      {:decimal, "~> 2.3"},
+      {:req, "~> 0.5"},
+      {:decimal, "~> 3.0"},
       {:typed_ecto_schema, "~> 0.4"},
       {:ecto, "~> 3.12"},
-
-      {:bypass, "~> 2.1", only: :test},
 
       # only for dev
       {:dialyxir, ">= 0.0.0", only: [:dev, :test], runtime: false},
