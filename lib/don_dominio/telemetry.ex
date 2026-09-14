@@ -44,7 +44,19 @@ defmodule DonDominio.Telemetry do
   def handle_event(_event, _measurements, _metadata, _config), do: :ok
 
   defp status({:ok, %Finch.Response{status: status}}), do: status
+
+  # Req 0.7 uses Finch.stream_while/5 even for buffered requests. Finch
+  # reports the reducer accumulator before Req builds its response.
+  defp status({:ok, {%Req.Request{}, {status, _headers, _body, _trailers}}})
+       when is_integer(status),
+       do: status
+
   defp status({:error, _reason}), do: "ERROR"
+  defp status({:error, _reason, _acc}), do: "ERROR"
+
+  # Other streaming consumers can use arbitrary accumulators. Never inspect
+  # them: requests and response bodies may contain credentials or private data.
+  defp status(_result), do: "UNKNOWN"
 
   defp log(%Finch.Request{method: method, path: path}, duration_native, status) do
     time_ms = System.convert_time_unit(duration_native, :native, :millisecond)
