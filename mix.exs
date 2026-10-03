@@ -4,7 +4,7 @@ defmodule DonDominio.MixProject do
   def project do
     [
       app: :don_dominio,
-      version: "0.1.1",
+      version: "0.1.2",
       elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
