@@ -118,6 +118,25 @@ defmodule DonDominio.Response do
     %__MODULE__{response | errorMsg: err_msg(error_code)}
   end
 
+  # Actions whose successful responseData carries lists ("domains",
+  # "billing", "zones"...) that the clauses below map over. A failed call
+  # answers without them, so it keeps its raw responseData instead of
+  # crashing the caller on a nil list.
+  @list_actions ~w(
+    domain/check
+    domain/checkfortransfer
+    domain/create
+    domain/transfer
+    domain/renew
+    domain/list
+    contact/list
+    account/zones
+  )
+
+  defp response_data(%__MODULE__{success: false, action: action} = response)
+       when action in @list_actions,
+       do: response
+
   defp response_data(%__MODULE__{action: "domain/check"} = response) do
     domains = Enum.map(response.responseData["domains"], &Check.normalize/1)
     %__MODULE__{response | responseData: %{domains: domains}}

@@ -434,4 +434,38 @@ defmodule DonDominio.ResponseTest do
       assert expected == DonDominio.Response.normalize(response)
     end
   end
+
+  describe "failed responses" do
+    # A failed call answers without the "billing"/"domains"/... lists the
+    # successful shape has -- normalizing must not crash on them.
+    for action <- [
+          "domain/create",
+          "domain/transfer",
+          "domain/renew",
+          "domain/check",
+          "domain/checkfortransfer",
+          "domain/list",
+          "contact/list",
+          "account/zones"
+        ] do
+      test "#{action} keeps the error instead of crashing" do
+        params = %{
+          "success" => false,
+          "errorCode" => 2001,
+          "errorCodeMsg" => "Invalid domain name",
+          "action" => unquote(action),
+          "messages" => ["Invalid domain name"],
+          "responseData" => %{}
+        }
+
+        assert %DonDominio.Response{
+                 success: false,
+                 errorCode: 2001,
+                 errorMsg: "Invalid domain name",
+                 messages: ["Invalid domain name"],
+                 responseData: %{}
+               } = DonDominio.Response.normalize(params)
+      end
+    end
+  end
 end
