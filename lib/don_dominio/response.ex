@@ -3,6 +3,7 @@ defmodule DonDominio.Response do
   Normalize and handle response from DonDominio / MrDomain.
   """
   use TypedEctoSchema
+  require Logger
   alias DonDominio.Account.Info, as: AccountInfo
   alias DonDominio.Account.Promo
   alias DonDominio.Account.Zone
@@ -223,8 +224,20 @@ defmodule DonDominio.Response do
 
   defp response_data(%__MODULE__{action: "account/zones"} = response) do
     query_info = QueryInfo.normalize(response.responseData["queryInfo"])
-    zones = Enum.map(response.responseData["zones"], &Zone.normalize/1)
+    zones = Enum.flat_map(response.responseData["zones"], &normalize_zone/1)
     %__MODULE__{response | responseData: %{queryInfo: query_info, zones: zones}}
+  end
+
+  # One TLD whose data we cannot read is left out and logged: the others are still worth having.
+  defp normalize_zone(zone) do
+    [Zone.normalize(zone)]
+  rescue
+    error ->
+      Logger.warning(
+        "zone #{inspect(zone["tld"])} skipped, cannot read it: #{Exception.message(error)}"
+      )
+
+      []
   end
 
   @doc """
